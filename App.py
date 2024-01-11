@@ -6,8 +6,6 @@ import psycopg2 as conector
 from psycopg2 import OperationalError
 from datetime import date
 
-import os
-
 import gerarPdf_e_Excel as gerarFile
 import buscarAlunos
 import cadastraAluno
