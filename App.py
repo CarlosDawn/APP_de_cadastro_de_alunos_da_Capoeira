@@ -246,16 +246,6 @@ try:
 except OperationalError as e:
     messagebox.showwarning(message=f"{e}")
 
-#Criando Pastas para os arquivos de PDF e EXCEL
-try:
-    if not os.path.isdir("Alunos"):
-        os.mkdir("Alunos")
-    if not os.path.isdir("ListaDeAlunos"):
-        os.mkdir("ListaDeAlunos")
-
-except OperationalError as e:
-    messagebox.showwarning(message=f"{e}")
-
 #Janela Pricipal
 janelaConsulta = Tk()
 janelaConsulta.geometry("1250x580")
