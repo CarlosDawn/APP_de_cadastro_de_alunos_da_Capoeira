@@ -3,10 +3,12 @@ from tkinter import messagebox
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
+from tkinter.filedialog import askdirectory
 
 def gerarListaExcel(conexao):
     try:
-        writer = pd.ExcelWriter('ListaDeAlunos/Alunos.xlsx', engine="xlsxwriter")
+        caminhoDict = askdirectory()
+        writer = pd.ExcelWriter(f'{caminhoDict}/Alunos.xlsx', engine="xlsxwriter")
         workbook = writer.book
         ws = workbook.add_worksheet('Alunos')
 
@@ -109,7 +111,8 @@ def gerarFormularioPDF(id, conexao):
     listaRegistro = cursor.fetchone()
 
     try:
-        doc = canvas.Canvas(f"Alunos/Formulario_{id.strip().split()[1]}.pdf", pagesize=A4)
+        caminhoDict = askdirectory()
+        doc = canvas.Canvas(f"{caminhoDict}/Formulario_{id.strip().split()[1]}.pdf", pagesize=A4)
         doc.drawImage("Imagem_FORM/imgform.png", 0, 0, width=590, height=880)
         doc.drawString(160, 563, f"{listaRegistro[1]}")
         doc.drawString(190, 523, f"{listaRegistro[2][6:8]}/{listaRegistro[2][4:6]}/{listaRegistro[2][0:4]}")
