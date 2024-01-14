@@ -6,12 +6,24 @@ import psycopg2 as conector
 from psycopg2 import OperationalError
 from datetime import date
 
+#Aqui são importações de outros arquivos,
+#tentei manter neste arquivo (AppACCEB.py) somente a parte de
+#interassão com janelas tkinter, ja os outros arquivos fazem funções
+#mais especificas.
 import gerarPdf_e_Excel as gerarFile
 import buscarAlunos
 import cadastraAluno
 import alteraEexcluiAluno
 
-#esta função foi tirada da internet
+# Mostrar the window
+def show(janela):
+    janela.deiconify()
+
+
+# Sumir com the window
+def hide(janela):
+    janela.withdraw()
+
 def centralizarJanela(janela):
     janela.update_idletasks()
 
@@ -31,7 +43,9 @@ def centralizarJanela(janela):
     janela.deiconify()
 
 
-def areaAluno(nome, conexao):
+def areaAluno(nome, conexao, janela):
+    hide(janela)
+
     janelaAreaAluno = Toplevel()
     janelaAreaAluno["bg"] = "#87CEEB"
     janelaAreaAluno.geometry("680x580")
@@ -44,6 +58,8 @@ def areaAluno(nome, conexao):
     except OperationalError as e:
         messagebox.showwarning(message=f"{e}")
 
+    #Apos a execução do comando query, é feito um fetchone para pegar o registro
+    #de acordo com o id que foi passado na variavel nome
     listaRegistro = cursor.fetchone()
 
     title_l = Label(janelaAreaAluno, text="ACCEB | ESCRAVOS BRANCOS", font=("calibri 35 bold"), background="#87CEEB")
@@ -54,6 +70,9 @@ def areaAluno(nome, conexao):
                      font=("times 15"))
     demarc_l.place(x=50, y=title_l.winfo_reqheight() + 37)
 
+    #Esse formulario abaixo sera preenchido automaticamento com os dados do registro
+    #do id passado pela variavel nome, podendo ser alterados os dados manualmente e salvando
+    #ao clicar no botão alterar.
     Nome_completo_lbl = Label(janelaAreaAluno, text="Nome Completo", font=("calibri 15"), background="#87CEEB")
     Nome_completo_lbl.place(x=50, y=title_l.winfo_reqheight() + 95)
 
@@ -79,10 +98,10 @@ def areaAluno(nome, conexao):
     Nome_completo_btn.insert(0, f"{listaRegistro[1]}")
     Nome_completo_btn.place(x=230, y=title_l.winfo_reqheight() + 92)
 
-    #coloca o titulo da janela com o nome do aluno selecionado
     janelaAreaAluno.title(f"{listaRegistro[1]}")
 
-    #Como a data esta em um formato diferente, deparei os dados em variaveis para poder utiliza-la
+    #Quando o valor de variaveis com datas são pegos, os dados estão em ordem diferente,
+    #e tambem por virem de um DateList a forma como são tratados é diferente para funcionar.
     dataNascAno = int(listaRegistro[2][0:4])
     dataNascMes = int(listaRegistro[2][4:6])
     dataNascDia = int(listaRegistro[2][6:8])
@@ -125,7 +144,7 @@ def areaAluno(nome, conexao):
         lbl_pergunta = Label(janelaExcluir, text="TEM CERTEZA QUE QUE DESEJA EXCLUIR ESTE CADASTRO",
                              font=("calibri 10 bold"), background="sky blue")
         lbl_pergunta.place(x=25, y=20)
-        btn_sim = Button(janelaExcluir, text="SIM", command=lambda: [alteraEexcluiAluno.excluir(conexao, nome.strip().split()[0]), janelaExcluir.destroy(), janelaAreaAluno.destroy()])
+        btn_sim = Button(janelaExcluir, text="SIM", command=lambda: [alteraEexcluiAluno.excluir(conexao, nome.strip().split()[0]), janelaExcluir.destroy(), janelaAreaAluno.destroy(), show(janela)])
         btn_nao = Button(janelaExcluir, text="NÃO", command=lambda: janelaExcluir.destroy())
         btn_sim.place(x=25, y=60)
         btn_nao.place(x=260, y=60)
@@ -141,7 +160,7 @@ def areaAluno(nome, conexao):
                                                                                                 Data_inicio_btn.entry.get(), nome.strip().split()[0]))
     Button_cad.place(x=130, y=title_l.winfo_reqheight() + 430)
 
-    Button_sair = Button(janelaAreaAluno, text="SAIR", width=27, command=lambda: janelaAreaAluno.destroy())
+    Button_sair = Button(janelaAreaAluno, text="SAIR", width=27, command=lambda: [janelaAreaAluno.destroy(), show(janela)])
     Button_sair.place(x=360, y=title_l.winfo_reqheight() + 430)
 
     Button_delete = Button(janelaAreaAluno, text="EXCLUIR CADASTRO", width=27, command=lambda: janelaExcluirAluno())
@@ -154,7 +173,9 @@ def areaAluno(nome, conexao):
     janelaAreaAluno.mainloop()
 
 
-def cadastrarAluno(conexao):
+def cadastrarAluno(conexao, janela):
+    hide(janela)
+
     janelaCadastro = Toplevel()
     janelaCadastro["bg"] = "#87CEEB"
     janelaCadastro.geometry("630x580")
@@ -169,6 +190,8 @@ def cadastrarAluno(conexao):
                      font=("times 15"))
     demarc_l.place(x=50, y=title_l.winfo_reqheight() + 37)
 
+    #O formulario abaixo realiza o cadastro do registro no banco de daos
+    #ao clicar no botão cadastrar.
     Nome_completo_lbl = Label(janelaCadastro, text="Nome Completo", font=("calibri 15"), background="#87CEEB")
     Nome_completo_lbl.place(x=50, y=title_l.winfo_reqheight() + 95)
 
@@ -211,7 +234,8 @@ def cadastrarAluno(conexao):
     Data_inicio_btn = tb.DateEntry(janelaCadastro, bootstyle="danger")
     Data_inicio_btn.place(x=230, y=title_l.winfo_reqheight() + 370)
 
-    #Esta função limpa o formulario e seleciona o primeiro campo
+    #Esta função limpa o formulario apagando o que foi digitado
+    #apos ser cadastrado o aluno e é selecionado o Entry do Nome Completo.
     def limpaForm():
         Nome_completo_btn.delete(0, 'end')
         Nome_pai_btn.delete(0, 'end')
@@ -220,31 +244,41 @@ def cadastrarAluno(conexao):
         Bairro_btn.delete(0, 'end')
         Nome_completo_btn.focus()
 
-    Button_cad = Button(janelaCadastro, text="CADASTRAR", width=23, command=lambda: [cadastraAluno.cadastrar(conexao,
-                                                                                                            Nome_completo_btn.get(),
-                                                                                                            Data_nasc_btn.entry.get(),
-                                                                                                            Nome_pai_btn.get(), Nome_mae_btn.get(),
-                                                                                                            Endereco_btn.get(), Bairro_btn.get(),
-                                                                                                            Data_inicio_btn.entry.get()), limpaForm()])
+    def sendAlunoData():
+        if (Nome_completo_btn.get() == '') or (Nome_pai_btn.get() == '') or (Nome_mae_btn.get() == '') or (
+                Endereco_btn.get() == '') or (Bairro_btn.get() == ''):
+            messagebox.showinfo(message="Campo(s) Sem Valor")
+        else:
+            cadastraAluno.cadastrar(conexao,
+                                    Nome_completo_btn.get(),
+                                    Data_nasc_btn.entry.get(),
+                                    Nome_pai_btn.get(), Nome_mae_btn.get(),
+                                    Endereco_btn.get(), Bairro_btn.get(),
+                                    Data_inicio_btn.entry.get())
+            limpaForm()
+
+    Button_cad = Button(janelaCadastro, text="CADASTRAR", width=23, command=lambda: sendAlunoData())
     Button_cad.place(x=230, y=title_l.winfo_reqheight() + 430)
 
-    Button_sair = Button(janelaCadastro, text="SAIR", width=17, command=lambda: janelaCadastro.destroy())
+    Button_sair = Button(janelaCadastro, text="SAIR", width=17, command=lambda: [janelaCadastro.destroy(), show(janela)])
     Button_sair.place(x=475, y=title_l.winfo_reqheight() + 430)
     janelaCadastro.mainloop()
 
-#Fazendo conexão com o Banco de Dados PostgreSQL
+
 global conexao
+
+#A parte abaixo é feito a conexão com o banco de dados do postgreslq,
+#as tabelas ja foram criadas antes no caso deste prjeto.
 try:
     conexao = conector.connect(
-        database="*********",
-        user="*********",
-        password="*********",
-        host="*********",
-        port="*********")
+        database="BD_Capoeira",
+        user="postgres",
+        password="Ryuri22@33",
+        host="localhost",
+        port="5434")
 except OperationalError as e:
     messagebox.showwarning(message=f"{e}")
 
-#Janela Pricipal
 janelaConsulta = Tk()
 janelaConsulta.geometry("1250x580")
 janelaConsulta.title("ACCEB | ESCRAVOS BRANCOS")
@@ -270,12 +304,12 @@ lb_Lista.place(x=10, y=title_l.winfo_reqheight() + 25)
 
 janelaConsulta["bg"] = "sky blue"
 
-
-#Função utilizada para pegar o registro selecionado
+#Esta função auxilia o ListBox para que seja pego
+#o dados do registro selecionado na lista
 def chamaAreaAluno(event):
-    areaAluno(lb_Lista.get(ACTIVE), conexao)
+    areaAluno(lb_Lista.get(ACTIVE), conexao, janelaConsulta)
 
-#Adiciona o duplo click no registro do ListBox
+#Adiciona a função acima ao dar dois clicks.
 lb_Lista.bind('<Double-1>', chamaAreaAluno)
 
 btn_escolha = Button(janelaConsulta, text="BUSCAR", width=25, command=lambda: buscarAlunos.Buscar(cursor, nome_aluno_btn.get(), lb_Lista))
@@ -284,7 +318,7 @@ btn_escolha.place(x=980, y=title_l.winfo_reqheight() + 150)
 btn_lista = Button(janelaConsulta, text="GERAR LISTA", width=15, command=lambda: gerarFile.gerarListaExcel(conexao))
 btn_lista.place(x=1010, y=title_l.winfo_reqheight() + 460)
 
-btn_cadastrar = Button(janelaConsulta, text="CADASTRAR", width=15, command=lambda: cadastrarAluno(conexao))
+btn_cadastrar = Button(janelaConsulta, text="CADASTRAR", width=15, command=lambda: cadastrarAluno(conexao, janelaConsulta))
 btn_cadastrar.place(x=930, y=title_l.winfo_reqheight() + 500)
 
 btn_sair = Button(janelaConsulta, text="SAIR", width=15, command=lambda: janelaConsulta.destroy())
