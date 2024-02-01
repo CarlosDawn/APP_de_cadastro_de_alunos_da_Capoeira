@@ -6,6 +6,7 @@ import psycopg2 as conector
 from psycopg2 import OperationalError
 from datetime import date
 
+from PIL import Image, ImageTk
 #Aqui são importações de outros arquivos,
 #tentei manter neste arquivo (AppACCEB.py) somente a parte de
 #interassão com janelas tkinter, ja os outros arquivos fazem funções
@@ -14,6 +15,9 @@ import gerarPdf_e_Excel as gerarFile
 import buscarAlunos
 import cadastraAluno
 import alteraEexcluiAluno
+
+import incluirImagem
+
 
 # Mostrar the window
 def show(janela):
@@ -42,13 +46,12 @@ def centralizarJanela(janela):
 
     janela.deiconify()
 
-
 def areaAluno(nome, conexao, janela):
     hide(janela)
 
     janelaAreaAluno = Toplevel()
     janelaAreaAluno["bg"] = "#87CEEB"
-    janelaAreaAluno.geometry("680x580")
+    janelaAreaAluno.geometry("910x580")
     centralizarJanela(janelaAreaAluno)
 
     cursor = conexao.cursor()
@@ -63,12 +66,12 @@ def areaAluno(nome, conexao, janela):
     listaRegistro = cursor.fetchone()
 
     title_l = Label(janelaAreaAluno, text="ACCEB | ESCRAVOS BRANCOS", font=("calibri 35 bold"), background="#87CEEB")
-    title_l.place(x=30, y=30)
+    title_l.place(x=160, y=30)
 
     demarc_l = Label(janelaAreaAluno, text="************************************************************",
                      foreground="#008000", background="#87CEEB",
                      font=("times 15"))
-    demarc_l.place(x=50, y=title_l.winfo_reqheight() + 37)
+    demarc_l.place(x=160, y=title_l.winfo_reqheight() + 37)
 
     #Esse formulario abaixo sera preenchido automaticamento com os dados do registro
     #do id passado pela variavel nome, podendo ser alterados os dados manualmente e salvando
@@ -134,6 +137,20 @@ def areaAluno(nome, conexao, janela):
                                    startdate=date(dataInicAno, dataInicMes, dataInicDia))
     Data_inicio_btn.place(x=230, y=title_l.winfo_reqheight() + 370)
 
+    if listaRegistro[8] != " ":
+        imagem = Image.open(r"{}".format(listaRegistro[8]))
+    else:
+        caminho = r"C:\Users\lembr\OneDrive\Imagens\9-94702_user-outline-icon-clipart-png-download-profile-icon.png"
+        imagem = Image.open(r"{}".format(caminho))
+    resizeimg = imagem.resize((130, 180))
+    img = ImageTk.PhotoImage(resizeimg)
+    LabelImg = Label(janelaAreaAluno, image = img)
+    LabelImg.image = img
+    LabelImg.place(x=680, y=title_l.winfo_reqheight() + 108)
+
+    Altera_img = Button(janelaAreaAluno, text=("ALTERAR"), width=15, command=lambda : incluirImagem.alteraIMG(conexao, listaRegistro[0]))
+    Altera_img.place(x=690, y=title_l.winfo_reqheight() + 295)
+
     def janelaExcluirAluno():
         janelaExcluir = Tk()
         janelaExcluir["bg"] = "sky blue"
@@ -178,7 +195,7 @@ def cadastrarAluno(conexao, janela):
 
     janelaCadastro = Toplevel()
     janelaCadastro["bg"] = "#87CEEB"
-    janelaCadastro.geometry("630x580")
+    janelaCadastro.geometry("680x580")
     janelaCadastro.title("CADASTRAR ALUNO")
     centralizarJanela(janelaCadastro)
 
@@ -299,13 +316,14 @@ nome_aluno_lbl.place(x=990, y=title_l.winfo_reqheight() + 70)
 nome_aluno_btn = Entry(janelaConsulta, font=("times 15"), width=25)
 nome_aluno_btn.place(x=930, y=title_l.winfo_reqheight() + 105)
 
-lb_Lista = Listbox(janelaConsulta, width=83, height=20, font=(("calibri 15 bold")))
+lb_Lista = Listbox(janelaConsulta, width=83, height=20, font=("calibri 15 bold"))
 lb_Lista.place(x=10, y=title_l.winfo_reqheight() + 25)
 
 janelaConsulta["bg"] = "sky blue"
 
 #Esta função auxilia o ListBox para que seja pego
 #o dados do registro selecionado na lista
+
 def chamaAreaAluno(event):
     areaAluno(lb_Lista.get(ACTIVE), conexao, janelaConsulta)
 
