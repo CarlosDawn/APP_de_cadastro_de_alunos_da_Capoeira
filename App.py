@@ -288,11 +288,11 @@ global conexao
 #as tabelas ja foram criadas antes no caso deste prjeto.
 try:
     conexao = conector.connect(
-        database="BD_Capoeira",
-        user="postgres",
-        password="Ryuri22@33",
-        host="localhost",
-        port="5434")
+        database="*******",
+        user="*******",
+        password="*******",
+        host="*******",
+        port="*******")
 except OperationalError as e:
     messagebox.showwarning(message=f"{e}")
 
